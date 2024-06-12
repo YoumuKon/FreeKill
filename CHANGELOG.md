@@ -1,4 +1,10 @@
-# ChangeLog
+# fork版ChangeLog
+
+## v0.4.17.341
+
+麻了，配置文件里的版本号不能有英文字符
+
+# 本体ChangeLog
 
 ## v0.4.16 & v0.4.17
 
