@@ -4,6 +4,7 @@ import QtQuick
 import Qt5Compat.GraphicalEffects
 import Fk
 import Fk.PhotoElement
+import Fk.RoomElement
 
 /* Layout of general card:
  *      +--------+
@@ -18,13 +19,12 @@ import Fk.PhotoElement
 
 CardItem {
   property string kingdom
+  property string servant:""
+  property string cardinfo: ""
   property string subkingdom: "wei"
   property int hp
   property int maxHp
   property int shieldNum
-  property int mainMaxHp
-  property int deputyMaxHp
-  property int inPosition: 0
   property string pkgName: ""
   property bool detailed: true
   property alias hasCompanions: companions.visible
@@ -49,8 +49,8 @@ CardItem {
     scale: subkingdom ? 0.6 : 1
     width: 34; fillMode: Image.PreserveAspectFit
     transformOrigin: Item.TopLeft
-    source: SkinBank.getGeneralCardDir(kingdom) + kingdom
-    visible: detailed && known
+    source: kingdom ? SkinBank.getGeneralCardDir(kingdom) + kingdom : ""
+    visible: kingdom && detailed && known
   }
 
   Image {
@@ -66,15 +66,15 @@ CardItem {
     x: 34
     y: 4
     spacing: 1
-    visible: detailed && known && !heg
+    visible: hp && detailed && known && !heg
     Repeater {
-      id: hpRepeater
+      id: lm_hpRepeater
       model: (!heg) ? ((hp > 5 || hp !== maxHp) ? 1 : hp) : 0
       Item {
         width: childrenRect.width
         height: childrenRect.height
         Image {
-          source: SkinBank.getGeneralCardDir(kingdom) + kingdom + "-magatama"
+          source: kingdom ? SkinBank.getGeneralCardDir(kingdom) + kingdom + "-magatama" : ""
         }
         Image {
           id: subkingdomMagatama
@@ -114,23 +114,20 @@ CardItem {
     x: 34
     y: 3
     spacing: 0
-    visible: detailed && known && heg
+    visible: hp && detailed && known && heg
     Repeater {
-      id: hegHpRepeater
+      id: lm_hegHpRepeater
       model: heg ? ((hp > 7 || hp !== maxHp) ? 1 : Math.ceil(hp / 2)) : 0
       Item {
         width: childrenRect.width
         height: childrenRect.height
         Image {
-          opacity: ((mainMaxHp < 0 || deputyMaxHp < 0) && (index * 2 + 1 === hp) && inPosition !== -1)
-                    ? (inPosition === 0 ? 0.5 : 0) :1
           height: 12; fillMode: Image.PreserveAspectFit
           source: SkinBank.getGeneralCardDir(kingdom) + kingdom + "-magatama-l"
         }
         Image {
           x: 4.4
-          opacity: (index + 1) * 2 <= hp ? (((mainMaxHp < 0 || deputyMaxHp < 0) && inPosition !== -1 && ((index + 1) * 2 === hp))
-                    ? (inPosition === 0 ? 0.5 : 0) : 1) : 0
+          opacity: (index + 1) * 2 <= hp ? 1 : 0
           height: 12; fillMode: Image.PreserveAspectFit
           source: {
             const k = subkingdom ? subkingdom : kingdom;
@@ -154,7 +151,7 @@ CardItem {
     visible: shieldNum > 0 && detailed && known
     anchors.right: parent.right
     anchors.top: parent.top
-    anchors.topMargin: hpRepeater.model > 4 ? 16 : 0
+    anchors.topMargin: lm_hpRepeater.model > 4 ? 16 : 0
     scale: 0.8
     value: shieldNum
   }
@@ -226,15 +223,58 @@ CardItem {
     }
   }
 
+  Text {
+    visible: servant !== "" ? true:false
+    anchors.bottom: parent.bottom
+    anchors.bottomMargin: parent.height / 2 - 10
+    anchors.right: parent.right
+    anchors.rightMargin: 4
+    text: "将领:" + luatr(servant)
+    x: 2; y: 1
+    font.family: fontLibian.name
+    font.pixelSize: 14
+    color: "red"
+    style: Text.Outline
+    textFormat: Text.RichText
+  }
+
+  Text {
+    width: 20
+    height: 80
+    anchors.top: parent.top
+    anchors.topMargin: 20
+    anchors.right: parent.right
+    anchors.rightMargin: 4
+    text: cardinfo !== "" ? luatr(cardinfo) : "nil"
+    visible: cardinfo !== "" ? true:false
+    color: "red"
+    font.family: fontLibian.name
+    font.pixelSize: 18
+    lineHeight: Math.max(1.4 - lineCount / 8, 0.6)
+    style: Text.Outline
+    wrapMode: Text.WrapAnywhere
+  }
+
   onNameChanged: {
-    const data = lcall("GetGeneralData", name);
+    // console.log(name);
+    // console.log("------------onNameChanged-----------")
+    // const data = lcall("Lm_GetGeneralData", name);
+    const data = lcall("GetGeneralData", name)
+
     kingdom = data.kingdom;
     subkingdom = (data.subkingdom !== kingdom && data.subkingdom) || "";
     hp = data.hp;
     maxHp = data.maxHp;
     shieldNum = data.shield;
-    mainMaxHp = data.mainMaxHpAdjustedValue;
-    deputyMaxHp = data.deputyMaxHpAdjustedValue;
+    servant = data.servant ? data.servant : "";
+    if(data.cardinfo){
+      // console.log(kingdom)
+      cardinfo = data.cardinfo;
+      kingdom = "";
+      hp = 0;
+    }else{
+      cardinfo = ""
+    }
 
     const splited = name.split("__");
     if (splited.length > 1) {

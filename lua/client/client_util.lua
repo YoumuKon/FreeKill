@@ -21,6 +21,8 @@ function GetGeneralData(name)
     shield = general.shield,
     hidden = general.hidden,
     total_hidden = general.total_hidden,
+    servant = general.servant,
+    cardinfo = general.cardinfo
   }
 end
 
