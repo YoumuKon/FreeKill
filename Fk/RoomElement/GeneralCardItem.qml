@@ -19,8 +19,8 @@ import Fk.RoomElement
 
 CardItem {
   property string kingdom
-  property string servant:""
-  property string cardinfo: ""
+  property string servant
+  property string cardinfo
   property string subkingdom: "wei"
   property int hp
   property int maxHp
@@ -224,7 +224,7 @@ CardItem {
   }
 
   Text {
-    visible: servant !== "" ? true:false
+    visible: servant ? true:false
     anchors.bottom: parent.bottom
     anchors.bottomMargin: parent.height / 2 - 10
     anchors.right: parent.right
@@ -245,8 +245,8 @@ CardItem {
     anchors.topMargin: 20
     anchors.right: parent.right
     anchors.rightMargin: 4
-    text: cardinfo !== "" ? luatr(cardinfo) : "nil"
-    visible: cardinfo !== "" ? true:false
+    text: cardinfo ? luatr(cardinfo) : "nil"
+    visible: cardinfo ? true:false
     color: "red"
     font.family: fontLibian.name
     font.pixelSize: 18
@@ -266,14 +266,11 @@ CardItem {
     hp = data.hp;
     maxHp = data.maxHp;
     shieldNum = data.shield;
-    servant = data.servant ? data.servant : "";
-    if(data.cardinfo){
-      // console.log(kingdom)
-      cardinfo = data.cardinfo;
-      kingdom = "";
+    servant = data.servant ? data.servant : null;
+    if(servant){
+      cardinfo = data.cardinfo ? data.cardinfo : null;
+      kingdom = null;
       hp = 0;
-    }else{
-      cardinfo = ""
     }
 
     const splited = name.split("__");
