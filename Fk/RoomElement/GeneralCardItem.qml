@@ -267,7 +267,7 @@ CardItem {
     maxHp = data.maxHp;
     shieldNum = data.shield;
     servant = data.servant ? data.servant : null;
-    if(servant){
+    if(!servant){
       cardinfo = data.cardinfo ? data.cardinfo : null;
       kingdom = null;
       hp = 0;
